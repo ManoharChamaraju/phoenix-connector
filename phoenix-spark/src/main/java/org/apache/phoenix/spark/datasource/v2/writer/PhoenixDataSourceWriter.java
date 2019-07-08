@@ -39,8 +39,11 @@ public class PhoenixDataSourceWriter implements DataSourceWriter {
         if (!mode.equals(SaveMode.Overwrite)) {
             throw new RuntimeException("SaveMode other than SaveMode.OverWrite is not supported");
         }
-        if (!options.tableName().isPresent()) {
-            throw new RuntimeException("No Phoenix option " + DataSourceOptions.TABLE_KEY + " defined");
+        //if (!options.tableName().isPresent()) {
+            //throw new RuntimeException("No Phoenix option " + DataSourceOptions.TABLE_KEY + " defined");
+        //}
+    	if (!options.get("table").isPresent()) {
+            throw new RuntimeException("No Phoenix option " + ZOOKEEPER_URL + " defined");
         }
         if (!options.get(ZOOKEEPER_URL).isPresent()) {
             throw new RuntimeException("No Phoenix option " + ZOOKEEPER_URL + " defined");
@@ -77,7 +80,7 @@ public class PhoenixDataSourceWriter implements DataSourceWriter {
         String zkUrl = options.get(ZOOKEEPER_URL).get();
         boolean skipNormalizingIdentifier = options.getBoolean(SKIP_NORMALIZING_IDENTIFIER, false);
         return new PhoenixDataSourceWriteOptions.Builder()
-                .setTableName(options.tableName().get())
+                .setTableName(options.get("table").get())
                 .setZkUrl(zkUrl)
                 .setScn(scn)
                 .setTenantId(tenantId)
