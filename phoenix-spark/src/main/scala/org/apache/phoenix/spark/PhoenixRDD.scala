@@ -38,6 +38,8 @@ class PhoenixRDD(sc: SparkContext, table: String, columns: Seq[String],
                 )
   extends RDD[PhoenixRecordWritable](sc, Nil) {
 
+  val PROPERTY_POLICY_PROVIDER_ENABLED  = "phoenix.property.policy.provider.enabled";
+  
   // Make sure to register the Phoenix driver
   DriverManager.registerDriver(new PhoenixDriver)
 
@@ -74,13 +76,17 @@ class PhoenixRDD(sc: SparkContext, table: String, columns: Seq[String],
     }
   }
 
+  def setPropertyPolicyProviderDisabled(configuration: Configuration) {
+        configuration.set(PROPERTY_POLICY_PROVIDER_ENABLED, "false");
+  }
+  
   def getPhoenixConfiguration: Configuration = {
 
     val config = HBaseFactoryProvider.getConfigurationFactory.getConfiguration(conf);
 
     PhoenixConfigurationUtil.setInputClass(config, classOf[PhoenixRecordWritable])
     PhoenixConfigurationUtil.setInputTableName(config, table)
-    PhoenixConfigurationUtil.setPropertyPolicyProviderDisabled(config);
+    setPropertyPolicyProviderDisabled(config);
 
     if(!columns.isEmpty) {
       PhoenixConfigurationUtil.setSelectColumnNames(config, columns.toArray)

@@ -44,9 +44,6 @@ import org.junit.Test;
 
 import com.google.common.collect.Lists;
 
-import scala.Option;
-import scala.collection.JavaConverters;
-
 public class OrderByIT extends BaseOrderByIT {
 
     @Override

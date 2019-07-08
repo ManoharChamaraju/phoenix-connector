@@ -28,8 +28,8 @@ IsNotNull, IsNull, LessThan, LessThanOrEqual, Not, Or, StringContains, StringEnd
 
 class FilterExpressionCompiler() {
 
-  val dateformatter:Format = DateUtil.getDateFormatter(DateUtil.DEFAULT_DATE_FORMAT, DateUtil.DEFAULT_TIME_ZONE_ID)
-  val timeformatter:Format = DateUtil.getTimestampFormatter(DateUtil.DEFAULT_TIME_FORMAT, DateUtil.DEFAULT_TIME_ZONE_ID)
+  val dateformatter:Format = DateUtil.getDateFormatter(DateUtil.DEFAULT_DATE_FORMAT)
+  val timeformatter:Format = DateUtil.DEFAULT_TIMESTAMP_FORMATTER
 
   /**
     * Attempt to create Phoenix-accepted WHERE clause from Spark filters,

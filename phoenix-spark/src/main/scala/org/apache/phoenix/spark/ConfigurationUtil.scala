@@ -22,8 +22,12 @@ import org.apache.phoenix.util.{ColumnInfo, PhoenixRuntime}
 
 import scala.collection.JavaConversions._
 
+
+
 @deprecated("Use the DataSource V2 API implementation (see PhoenixDataSource)")
 object ConfigurationUtil extends Serializable {
+  
+  val PROPERTY_POLICY_PROVIDER_ENABLED  = "phoenix.property.policy.provider.enabled";
 
   def getOutputConfiguration(tableName: String, columns: Seq[String], zkUrl: Option[String], tenantId: Option[String] = None, conf: Option[Configuration] = None): Configuration = {
 
@@ -43,7 +47,7 @@ object ConfigurationUtil extends Serializable {
     PhoenixConfigurationUtil.setOutputTableName(config, tableName)
     PhoenixConfigurationUtil.setPhysicalTableName(config, tableName)
     // disable property provider evaluation
-    PhoenixConfigurationUtil.setPropertyPolicyProviderDisabled(config);
+    setPropertyPolicyProviderDisabled(config);
 
     // Infer column names from the DataFrame schema
     PhoenixConfigurationUtil.setUpsertColumnNames(config, Array(columns : _*))
@@ -63,6 +67,10 @@ object ConfigurationUtil extends Serializable {
     config
   }
 
+   def setPropertyPolicyProviderDisabled(configuration: Configuration) {
+        configuration.set(PROPERTY_POLICY_PROVIDER_ENABLED, "false");
+  }
+   
   def setZookeeperURL(conf: Configuration, zkUrl: String) = {
     val info = PhoenixEmbeddedDriver.ConnectionInfo.create(zkUrl)
     conf.set(HConstants.ZOOKEEPER_QUORUM, info.getZookeeperQuorum)
