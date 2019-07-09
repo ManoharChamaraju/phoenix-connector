@@ -78,7 +78,7 @@ public class PhoenixDataWriter implements DataWriter<InternalRow> {
             String upsertSql = QueryUtil.constructUpsertStatement(options.getTableName(), colNames, null);
             this.statement = this.conn.prepareStatement(upsertSql);
             this.batchSize = Long.valueOf(overridingProps.getProperty(UPSERT_BATCH_SIZE,
-                    String.valueOf(100)));
+                    String.valueOf(DEFAULT_UPSERT_BATCH_SIZE)));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -105,10 +105,8 @@ public class PhoenixDataWriter implements DataWriter<InternalRow> {
             }
             numRecords++;
             statement.addBatch();
-            logger.info("execute record "+ numRecords);
+            /* upsert and commit records to hbase for every batchsize % */
             if (numRecords % batchSize == 0) {
-            	logger.info("info-commit called on a batch of size : " + batchSize);
-            	logger.debug("debug-commit called on a batch of size : " + batchSize);
                 if (logger.isDebugEnabled()) {
                 	
                     logger.debug("commit called on a batch of size : " + batchSize);

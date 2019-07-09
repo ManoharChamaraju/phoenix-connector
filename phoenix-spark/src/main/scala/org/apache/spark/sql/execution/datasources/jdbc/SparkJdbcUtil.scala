@@ -287,6 +287,7 @@ object SparkJdbcUtil {
 
     case ArrayType(et, _) =>
       // remove type length parameters from end of type name
+      /* removed the toLower() for typeName */
       val typeName = getJdbcType(et, dialect).databaseTypeDefinition
         .split("\\(")(0)
       (stmt: PreparedStatement, row: Row, pos: Int) =>
