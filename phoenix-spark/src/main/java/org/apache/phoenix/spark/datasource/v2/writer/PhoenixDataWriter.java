@@ -78,7 +78,7 @@ public class PhoenixDataWriter implements DataWriter<InternalRow> {
             String upsertSql = QueryUtil.constructUpsertStatement(options.getTableName(), colNames, null);
             this.statement = this.conn.prepareStatement(upsertSql);
             this.batchSize = Long.valueOf(overridingProps.getProperty(UPSERT_BATCH_SIZE,
-                    String.valueOf(DEFAULT_UPSERT_BATCH_SIZE)));
+                    String.valueOf(100)));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -92,23 +92,28 @@ public class PhoenixDataWriter implements DataWriter<InternalRow> {
     public void write(InternalRow internalRow) throws IOException {
         try {
             int i=0;
+            Row row = SparkJdbcUtil.toRow(schema, internalRow);
             for (StructField field : schema.fields()) {
                 DataType dataType = field.dataType();
                 if (internalRow.isNullAt(i)) {
                     statement.setNull(i + 1, SparkJdbcUtil.getJdbcType(dataType,
                             PhoenixJdbcDialect$.MODULE$).jdbcNullType());
                 } else {
-                    Row row = SparkJdbcUtil.toRow(schema, internalRow);
                     SparkJdbcUtil.makeSetter(conn, PhoenixJdbcDialect$.MODULE$, dataType).apply(statement, row, i);
                 }
                 ++i;
             }
             numRecords++;
-            statement.execute();
+            statement.addBatch();
+            logger.info("execute record "+ numRecords);
             if (numRecords % batchSize == 0) {
+            	logger.info("info-commit called on a batch of size : " + batchSize);
+            	logger.debug("debug-commit called on a batch of size : " + batchSize);
                 if (logger.isDebugEnabled()) {
+                	
                     logger.debug("commit called on a batch of size : " + batchSize);
                 }
+                statement.executeBatch();
                 commitBatchUpdates();
             }
         } catch (SQLException e) {
@@ -119,6 +124,7 @@ public class PhoenixDataWriter implements DataWriter<InternalRow> {
     @Override
     public WriterCommitMessage commit() {
         try {
+        	statement.executeBatch();
             conn.commit();
         } catch (SQLException e) {
             throw new RuntimeException(e);
