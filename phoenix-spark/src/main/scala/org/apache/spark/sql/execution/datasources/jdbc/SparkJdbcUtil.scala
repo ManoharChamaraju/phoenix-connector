@@ -35,10 +35,10 @@ StructType, TimestampType}
 import org.apache.spark.unsafe.types.UTF8String
 import org.apache.spark.util.NextIterator
 
-object SparkJdbcUtil {
-
-  def toRow(schema: StructType, internalRow: InternalRow) : Row = {
-    val encoder = RowEncoder(schema).resolveAndBind()
+class SparkJdbcUtil(schema: StructType) {
+  var encoder = RowEncoder(schema).resolveAndBind()
+  
+  def toRow(internalRow: InternalRow) : Row = {
     encoder.fromRow(internalRow)
   }
 
@@ -193,7 +193,6 @@ object SparkJdbcUtil {
   // TODO just use JdbcUtils.resultSetToSparkInternalRows in Spark 3.0 (see SPARK-26499)
   def resultSetToSparkInternalRows(
                                     resultSet: ResultSet,
-                                    schema: StructType,
                                     inputMetrics: InputMetrics): Iterator[InternalRow] = {
     // JdbcUtils.resultSetToSparkInternalRows(resultSet, schema, inputMetrics)
     new NextIterator[InternalRow] {

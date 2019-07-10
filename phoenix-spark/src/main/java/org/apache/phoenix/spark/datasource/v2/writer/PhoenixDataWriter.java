@@ -55,6 +55,7 @@ public class PhoenixDataWriter implements DataWriter<InternalRow> {
     private final PreparedStatement statement;
     private final long batchSize;
     private long numRecords = 0;
+    private SparkJdbcUtil jdbcutil;
 
     PhoenixDataWriter(PhoenixDataSourceWriteOptions options) {
         String scn = options.getScn();
@@ -68,6 +69,7 @@ public class PhoenixDataWriter implements DataWriter<InternalRow> {
             overridingProps.put(PhoenixRuntime.TENANT_ID_ATTRIB, tenantId);
         }
         this.schema = options.getSchema();
+        jdbcutil = new SparkJdbcUtil(schema);
         try {
             this.conn = DriverManager.getConnection(JDBC_PROTOCOL + JDBC_PROTOCOL_SEPARATOR + zkUrl,
                     overridingProps);
@@ -92,14 +94,14 @@ public class PhoenixDataWriter implements DataWriter<InternalRow> {
     public void write(InternalRow internalRow) throws IOException {
         try {
             int i=0;
-            Row row = SparkJdbcUtil.toRow(schema, internalRow);
+            Row row = jdbcutil.toRow(internalRow);
             for (StructField field : schema.fields()) {
                 DataType dataType = field.dataType();
                 if (internalRow.isNullAt(i)) {
-                    statement.setNull(i + 1, SparkJdbcUtil.getJdbcType(dataType,
+                    statement.setNull(i + 1, jdbcutil.getJdbcType(dataType,
                             PhoenixJdbcDialect$.MODULE$).jdbcNullType());
                 } else {
-                    SparkJdbcUtil.makeSetter(conn, PhoenixJdbcDialect$.MODULE$, dataType).apply(statement, row, i);
+                	jdbcutil.makeSetter(conn, PhoenixJdbcDialect$.MODULE$, dataType).apply(statement, row, i);
                 }
                 ++i;
             }
@@ -109,6 +111,7 @@ public class PhoenixDataWriter implements DataWriter<InternalRow> {
             if (numRecords % batchSize == 0) {
                 if (logger.isDebugEnabled()) {
                 	
+                	logger.info("commit called on a batch of size : " + batchSize);
                     logger.debug("commit called on a batch of size : " + batchSize);
                 }
                 statement.executeBatch();
