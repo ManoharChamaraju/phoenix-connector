@@ -34,11 +34,11 @@ Decimal, DecimalType, DoubleType, FloatType, IntegerType, LongType, Metadata, Sh
 StructType, TimestampType}
 import org.apache.spark.unsafe.types.UTF8String
 import org.apache.spark.util.NextIterator
+import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 
-class SparkJdbcUtil(schema: StructType) {
-  var encoder = RowEncoder(schema).resolveAndBind()
-  
-  def toRow(internalRow: InternalRow) : Row = {
+object SparkJdbcUtil {
+
+  def toRow(encoder: ExpressionEncoder[Row], internalRow: InternalRow) : Row = {
     encoder.fromRow(internalRow)
   }
 
@@ -193,6 +193,7 @@ class SparkJdbcUtil(schema: StructType) {
   // TODO just use JdbcUtils.resultSetToSparkInternalRows in Spark 3.0 (see SPARK-26499)
   def resultSetToSparkInternalRows(
                                     resultSet: ResultSet,
+                                    schema: StructType,
                                     inputMetrics: InputMetrics): Iterator[InternalRow] = {
     // JdbcUtils.resultSetToSparkInternalRows(resultSet, schema, inputMetrics)
     new NextIterator[InternalRow] {

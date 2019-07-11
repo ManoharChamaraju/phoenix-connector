@@ -69,14 +69,12 @@ public class PhoenixInputPartitionReader implements InputPartitionReader<Interna
     private Iterator<InternalRow> iterator;
     private PhoenixResultSet resultSet;
     private InternalRow currentRow;
-    private SparkJdbcUtil jdbcutil;
 
     PhoenixInputPartitionReader(PhoenixDataSourceReadOptions options, StructType schema,
             SerializableWritable<PhoenixInputSplit> phoenixInputSplit) {
         this.options = options;
         this.phoenixInputSplit = phoenixInputSplit;
         this.schema = schema;
-        jdbcutil = new SparkJdbcUtil(schema);
         initialize();
     }
 
@@ -148,7 +146,7 @@ public class PhoenixInputPartitionReader implements InputPartitionReader<Interna
             // multiple threads otherwise.
             this.resultSet = new PhoenixResultSet(iterator, queryPlan.getProjector().cloneIfNecessary(),
                     queryPlan.getContext());
-            this.iterator = jdbcutil.resultSetToSparkInternalRows(resultSet,  new InputMetrics());
+            this.iterator = SparkJdbcUtil.resultSetToSparkInternalRows(resultSet, schema, new InputMetrics());
         }
         catch (SQLException e) {
             throw new RuntimeException(e);
