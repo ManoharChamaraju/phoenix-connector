@@ -118,15 +118,11 @@ public class PhoenixDataWriter implements DataWriter<InternalRow> {
                 ++i;
             }
             numRecords++;
-            statement.addBatch();
-            /* upsert and commit records to hbase for every batchsize % */
+            statement.execute();
             if (numRecords % batchSize == 0) {
                 if (logger.isDebugEnabled()) {
-                	
-                	logger.info("commit called on a batch of size : " + batchSize);
                     logger.debug("commit called on a batch of size : " + batchSize);
                 }
-                statement.executeBatch();
                 commitBatchUpdates();
             }
         } catch (SQLException e) {
@@ -137,7 +133,6 @@ public class PhoenixDataWriter implements DataWriter<InternalRow> {
     @Override
     public WriterCommitMessage commit() {
         try {
-        	statement.executeBatch();
             conn.commit();
         } catch (SQLException e) {
             throw new RuntimeException(e);
