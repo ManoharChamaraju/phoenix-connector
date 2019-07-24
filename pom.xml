@@ -28,7 +28,6 @@
     <module>phoenix-pig</module>
     <module>phoenix-spark</module>
     <module>phoenix-hive</module>
-    <module>presto-phoenix-shaded</module>
   </modules>
 
   <repositories>
@@ -52,10 +51,10 @@
 
   <properties>
     <!-- Phoenix Version -->
-    <phoenix.version>4.15.0-HBase-1.4-SNAPSHOT</phoenix.version>
+    <phoenix.version>5.0.0-HBase-2.0</phoenix.version>
     <!-- Hadoop Versions -->
-    <hbase.version>1.4.0</hbase.version>
-    <hadoop-two.version>2.7.5</hadoop-two.version>
+    <hbase.version>2.0.2</hbase.version>
+    <hadoop-two.version>3.1.1</hadoop-two.version>
 
     <!-- General Properties -->
     <test.output.tofile>true</test.output.tofile>

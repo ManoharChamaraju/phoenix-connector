@@ -18,7 +18,11 @@
  */
 package org.apache.phoenix.spark;
 
-import com.google.common.base.Joiner;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.phoenix.jdbc.PhoenixConnection;
 import org.apache.phoenix.query.QueryServices;
@@ -30,13 +34,8 @@ import org.apache.spark.sql.SQLContext;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.execution.SparkPlan;
 import org.apache.spark.sql.sources.v2.DataSourceOptions;
-import scala.Option;
-import scala.collection.JavaConverters;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.List;
+import com.google.common.base.Joiner;
 
 public class SparkUtil {
 

@@ -23,7 +23,8 @@ import org.apache.hadoop.hbase.HRegionLocation;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.RegionLocator;
 import org.apache.hadoop.hbase.client.Scan;
-import org.apache.hadoop.hbase.util.RegionSizeCalculator;
+import org.apache.hadoop.hbase.mapreduce.RegionSizeCalculator;
+import org.apache.log4j.Logger;
 import org.apache.phoenix.compile.QueryPlan;
 import org.apache.phoenix.iterate.MapReduceParallelScanGrouper;
 import org.apache.phoenix.jdbc.PhoenixConnection;
@@ -65,6 +66,7 @@ import static org.apache.phoenix.util.PhoenixRuntime.JDBC_PROTOCOL_SEPARATOR;
 public class PhoenixDataSourceReader implements DataSourceReader, SupportsPushDownFilters,
         SupportsPushDownRequiredColumns {
 
+	private static final Logger logger = Logger.getLogger(PhoenixDataSourceReader.class);
     private final DataSourceOptions options;
     private final String tableName;
     private final String zkUrl;
@@ -77,14 +79,17 @@ public class PhoenixDataSourceReader implements DataSourceReader, SupportsPushDo
     private String whereClause;
 
     public PhoenixDataSourceReader(DataSourceOptions options) {
-        if (!options.tableName().isPresent()) {
-            throw new RuntimeException("No Phoenix option " + DataSourceOptions.TABLE_KEY + " defined");
+      //  if (!options.tableName().isPresent()) {
+      //      throw new RuntimeException("No Phoenix option " + DataSourceOptions.TABLE_KEY + " defined");
+       // }
+    	if (!options.get("table").isPresent()) {
+            throw new RuntimeException("No Phoenix option " + PhoenixDataSource.ZOOKEEPER_URL + " defined");
         }
         if (!options.get(PhoenixDataSource.ZOOKEEPER_URL).isPresent()) {
             throw new RuntimeException("No Phoenix option " + PhoenixDataSource.ZOOKEEPER_URL + " defined");
         }
         this.options = options;
-        this.tableName = options.tableName().get();
+        this.tableName = options.get("table").get();
         this.zkUrl = options.get(PhoenixDataSource.ZOOKEEPER_URL).get();
         this.dateAsTimestamp = options.getBoolean("dateAsTimestamp", false);
         this.overriddenProps = extractPhoenixHBaseConfFromOptions(options);
@@ -143,6 +148,7 @@ public class PhoenixDataSourceReader implements DataSourceReader, SupportsPushDo
             final Statement statement = conn.createStatement();
             final String selectStatement = QueryUtil.constructSelectStatement(tableName, columnInfos, whereClause);
             Preconditions.checkNotNull(selectStatement);
+            logger.info("sql query to run " + selectStatement);
 
             final PhoenixStatement pstmt = statement.unwrap(PhoenixStatement.class);
             // Optimize the query plan so that we potentially use secondary indexes
@@ -165,7 +171,7 @@ public class PhoenixDataSourceReader implements DataSourceReader, SupportsPushDo
                     phxConn.getQueryServices().getAdmin().getConnection();
             RegionLocator regionLocator = connection.getRegionLocator(TableName.valueOf(queryPlan
                     .getTableRef().getTable().getPhysicalName().toString()));
-            RegionSizeCalculator sizeCalculator = new RegionSizeCalculator(regionLocator, connection
+			RegionSizeCalculator sizeCalculator = new RegionSizeCalculator(regionLocator, connection
                     .getAdmin());
 
             final List<InputPartition<InternalRow>> partitions = Lists.newArrayListWithExpectedSize(allSplits.size());

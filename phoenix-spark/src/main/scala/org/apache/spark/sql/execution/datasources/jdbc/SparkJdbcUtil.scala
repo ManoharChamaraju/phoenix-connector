@@ -34,11 +34,11 @@ Decimal, DecimalType, DoubleType, FloatType, IntegerType, LongType, Metadata, Sh
 StructType, TimestampType}
 import org.apache.spark.unsafe.types.UTF8String
 import org.apache.spark.util.NextIterator
+import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 
 object SparkJdbcUtil {
 
-  def toRow(schema: StructType, internalRow: InternalRow) : Row = {
-    val encoder = RowEncoder(schema).resolveAndBind()
+  def toRow(encoder: ExpressionEncoder[Row], internalRow: InternalRow) : Row = {
     encoder.fromRow(internalRow)
   }
 
@@ -287,8 +287,9 @@ object SparkJdbcUtil {
 
     case ArrayType(et, _) =>
       // remove type length parameters from end of type name
+      /* removed the toLower() for typeName */
       val typeName = getJdbcType(et, dialect).databaseTypeDefinition
-        .toLowerCase(Locale.ROOT).split("\\(")(0)
+        .split("\\(")(0)
       (stmt: PreparedStatement, row: Row, pos: Int) =>
         val array = conn.createArrayOf(
           typeName,
