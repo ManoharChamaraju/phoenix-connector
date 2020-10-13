@@ -77,7 +77,7 @@
     <scala.version>2.11.8</scala.version>
     <scala.binary.version>2.11</scala.binary.version>
     <mockito-all.version>1.8.5</mockito-all.version>
-    <junit.version>4.12</junit.version>   
+    <junit.version>4.13.1</junit.version>   
 
     <!-- Plugin versions -->
     <maven-eclipse-plugin.version>2.9</maven-eclipse-plugin.version>
