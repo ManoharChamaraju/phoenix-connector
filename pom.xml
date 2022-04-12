@@ -55,7 +55,7 @@
     <phoenix.version>4.15.0-HBase-1.4-SNAPSHOT</phoenix.version>
     <!-- Hadoop Versions -->
     <hbase.version>1.4.0</hbase.version>
-    <hadoop-two.version>2.7.5</hadoop-two.version>
+    <hadoop-two.version>3.2.3</hadoop-two.version>
 
     <!-- General Properties -->
     <test.output.tofile>true</test.output.tofile>
